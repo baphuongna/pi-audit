@@ -15,7 +15,7 @@ describe("ReviewOrchestrator", () => {
 	test("resolvePerspectives defaults to enabled perspectives", () => {
 		const orchestrator = new ReviewOrchestrator(cwd);
 		// review() should run without error when perspectives can't be resolved
-		// In a temp dir with no .pi/pi-review.json, defaults are used
+		// In a temp dir with no .pi/pi-audit.json, defaults are used
 	});
 
 	test("reviewDiff returns a report structure", async () => {

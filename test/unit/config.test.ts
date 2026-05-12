@@ -25,11 +25,11 @@ describe("loadConfig", () => {
 		}
 	});
 
-	test("reads .pi/pi-review.json", () => {
+	test("reads .pi/pi-audit.json", () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-review-test-"));
 		try {
 			fs.mkdirSync(path.join(dir, ".pi"), { recursive: true });
-			fs.writeFileSync(path.join(dir, ".pi", "pi-review.json"), JSON.stringify({
+			fs.writeFileSync(path.join(dir, ".pi", "pi-audit.json"), JSON.stringify({
 				enabled: false,
 				quality: { rejectGeneric: false, minFindingsPerFile: 3 },
 				autoReview: { onEdit: true, onCommit: false },
@@ -53,7 +53,7 @@ describe("loadConfig", () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-review-test-"));
 		try {
 			fs.mkdirSync(path.join(dir, ".pi"), { recursive: true });
-			fs.writeFileSync(path.join(dir, ".pi", "pi-review.json"), "not json {{{");
+			fs.writeFileSync(path.join(dir, ".pi", "pi-audit.json"), "not json {{{");
 			const { config, source } = loadConfig(dir);
 			assert.equal(source, "defaults");
 			assert.equal(config.enabled, true);
@@ -66,7 +66,7 @@ describe("loadConfig", () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-review-test-"));
 		try {
 			fs.mkdirSync(path.join(dir, ".pi"), { recursive: true });
-			fs.writeFileSync(path.join(dir, ".pi", "pi-review.json"), JSON.stringify({
+			fs.writeFileSync(path.join(dir, ".pi", "pi-audit.json"), JSON.stringify({
 				perspectives: {
 					security: { enabled: false },
 					production: { enabled: true, severity: "must-fix" },
@@ -85,7 +85,7 @@ describe("loadConfig", () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-review-test-"));
 		try {
 			fs.mkdirSync(path.join(dir, ".pi"), { recursive: true });
-			fs.writeFileSync(path.join(dir, ".pi", "pi-review.json"), "42");
+			fs.writeFileSync(path.join(dir, ".pi", "pi-audit.json"), "42");
 			const { config, source } = loadConfig(dir);
 			assert.equal(source, "defaults");
 		} finally {
