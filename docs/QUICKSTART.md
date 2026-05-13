@@ -8,76 +8,81 @@ pi install npm:pi-audit
 
 ## Basic Usage
 
-### Run Full Security Review
+### 1. Review Current Changes
 
 ```bash
-# In your coding agent
+# Review unstaged changes
 /review
+
+# Review staged changes
+/review diff --staged
+
+# Review changes between branches
+/review diff --base=main --head=feature-branch
 ```
 
-### Audit Specific Target
+### 2. Security Review
 
 ```bash
-/audit src/auth/login.ts
-```
-
-### Security Focus
-
-```bash
+# Quick security scan
 /security
+
+# Full OWASP audit
+/review security --owasp
 ```
 
-## Configuration
+### 3. File Review
 
-```typescript
-// In your config
-{
-  "pi-audit": {
-    "rules": {
-      "owasp": true,
-      "complexity": 15,
-      "securityScore": 80
-    }
-  }
-}
+```bash
+# Review specific file
+/review file src/auth/login.ts
+
+# Review with full context
+/review file src/auth/login.ts --context=full
+```
+
+### 4. Generate Report
+
+```bash
+# Markdown report grouped by severity
+/review report --format=markdown --groupBy=severity
+
+# JSON report grouped by file
+/review report --format=json --groupBy=file
 ```
 
 ## Examples
 
-### Five-Axis Review
+### Example: Review Authentication Code
 
-```typescript
-import { FiveAxisReview } from 'pi-audit';
-
-const review = new FiveAxisReview();
-const result = await review.analyze(`
-function authenticate(user, pass) {
-  // Check credentials
-  return user === 'admin' && pass === 'secret';
-}
-`);
-
-console.log(result);
-// { security: 30, performance: 80, ... }
+```
+/review file src/auth/authentication.ts
 ```
 
-### AgentShield
+Output:
+```
+## Security Review: src/auth/authentication.ts
 
-```typescript
-import { AgentShield } from 'pi-audit';
+### Critical Issues
+- [C1] SQL Injection vulnerability in line 42
+- [C2] Missing rate limiting on login endpoint
 
-const shield = new AgentShield();
+### High Issues
+- [H1] Password stored without proper hashing
 
-// Validate user input
-if (!shield.validate(userInput)) {
-  console.log('Potential injection detected');
-}
+### Recommendations
+- Use parameterized queries
+- Implement account lockout policy
+```
 
-// Sanitize
-const safe = shield.sanitize(userInput);
+### Example: Diff Review
+
+```
+/review diff --base=HEAD~1 --head=HEAD
 ```
 
 ## Next Steps
 
-- Read [API.md](API.md) for full API reference
-- Check [SPEC.md](../SPEC.md) for feature details
+- Read [docs/GUIDE.md](GUIDE.md) for advanced usage
+- Read [docs/COMMANDS.md](COMMANDS.md) for command reference
+- Read [docs/CONFIG.md](CONFIG.md) for configuration options
