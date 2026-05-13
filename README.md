@@ -1,25 +1,36 @@
 # pi-audit
 
-Extension for Pi coding agent.
+Security review and compliance audit extension for Pi coding agents.
+
+## Features
+
+- **Five-Axis Review** - Security, Performance, Maintainability, Testing, Documentation
+- **OWASP Audit** - Automated vulnerability detection based on OWASP Top 10
+- **AgentShield** - Protection against prompt injection and malicious instructions
+- **CompletionMutationGuard** - Mutation detection for secure completion
+- **Diff Analysis** - Multi-perspective code review with diff scoping
 
 ## Install
-
-### From npm (recommended)
 
 ```bash
 pi install npm:pi-audit
 ```
 
-### From GitHub Packages
+## Usage
 
+### Run Full Security Review
 ```bash
-pi install npm:@baphuongna/pi-audit
+/review
 ```
 
-### From local source (development)
-
+### Audit Specific Target
 ```bash
-cd pi-audit && pi install .
+/audit src/auth/
+```
+
+### Security-Focused Review
+```bash
+/security
 ```
 
 ## Verify
