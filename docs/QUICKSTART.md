@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-npm install pi-audit
+pi install npm:pi-audit
 ```
 
 ## Basic Usage
