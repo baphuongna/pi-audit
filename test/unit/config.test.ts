@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test, { describe } from "node:test";
-import { loadConfig, DEFAULT_CONFIG } from "../../src/config.ts";
+import { loadConfig, DEFAULT_CONFIG, deepMerge } from "../../src/config.ts";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -81,15 +81,30 @@ describe("loadConfig", () => {
 		}
 	});
 
-	test("handles non-object root gracefully", () => {
+	test("deep-merges nested objects: override perspective without losing siblings", () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-review-test-"));
 		try {
 			fs.mkdirSync(path.join(dir, ".pi"), { recursive: true });
-			fs.writeFileSync(path.join(dir, ".pi", "pi-audit.json"), "42");
-			const { config, source } = loadConfig(dir);
-			assert.equal(source, "defaults");
+			fs.writeFileSync(path.join(dir, ".pi", "pi-audit.json"), JSON.stringify({
+				quality: { minFindingsPerFile: 5 },
+			}));
+			const { config } = loadConfig(dir);
+			// Deep merge: only minFindingsPerFile overridden, siblings preserved
+			assert.equal(config.quality.minFindingsPerFile, 5);
+			assert.equal(config.quality.rejectGeneric, true);
+			assert.equal(config.quality.requireEvidence, true);
 		} finally {
 			fs.rmSync(dir, { recursive: true });
 		}
+	});
+
+	test("deepMerge utility exports and works correctly", () => {
+		const base = { a: 1, b: { c: 2, d: 3 }, e: [1, 2] };
+		const override = { b: { c: 99 }, f: 10 };
+		const result = deepMerge(base as Record<string, unknown>, override) as Record<string, unknown>;
+		assert.equal(result.a, 1);
+		assert.equal((result.b as Record<string, unknown>).c, 99);
+		assert.equal((result.b as Record<string, unknown>).d, 3); // sibling preserved
+		assert.equal(result.f, 10);
 	});
 });

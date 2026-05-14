@@ -39,6 +39,29 @@ export const DEFAULT_CONFIG: ReviewExtensionConfig = {
 	autoReview: { ...DEFAULT_AUTO_REVIEW },
 };
 
+/** Recursively merge `override` into `base`, handling nested objects.
+ * Does not mutate either argument.
+ */
+function deepMerge(base: Record<string, unknown>, override: Record<string, unknown>): Record<string, unknown> {
+	const result: Record<string, unknown> = { ...base };
+	for (const key of Object.keys(override)) {
+		const bv = base[key];
+		const ov = override[key];
+		if (
+			bv !== undefined && ov !== undefined &&
+			typeof bv === "object" && !Array.isArray(bv) &&
+			typeof ov === "object" && !Array.isArray(ov)
+		) {
+			result[key] = deepMerge(bv as Record<string, unknown>, ov as Record<string, unknown>);
+		} else {
+			result[key] = ov;
+		}
+	}
+	return result;
+}
+
+export { deepMerge };
+
 export function loadConfig(cwd: string): { config: ReviewExtensionConfig; source: "file" | "defaults" } {
 	const configPath = path.join(cwd, ".pi", "pi-audit.json");
 
@@ -48,45 +71,16 @@ export function loadConfig(cwd: string): { config: ReviewExtensionConfig; source
 
 	try {
 		const raw = fs.readFileSync(configPath, "utf-8");
-		const parsed: unknown = JSON.parse(raw);
+		const parsed = JSON.parse(raw);
 
 		if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
 			return { config: structuredClone(DEFAULT_CONFIG), source: "defaults" };
 		}
 
-		const user = parsed as Record<string, unknown>;
-		const config = structuredClone(DEFAULT_CONFIG);
-
-		if (typeof user.enabled === "boolean") {
-			config.enabled = user.enabled;
-		}
-
-		if (typeof user.perspectives === "object" && user.perspectives !== null && !Array.isArray(user.perspectives)) {
-			const perspectives = user.perspectives as Record<string, unknown>;
-			for (const [name, value] of Object.entries(perspectives)) {
-				if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-					const p = value as Record<string, unknown>;
-					config.perspectives[name] = {
-						enabled: typeof p.enabled === "boolean" ? p.enabled : true,
-						severity: typeof p.severity === "string" ? (p.severity as Severity) : DEFAULT_PERSPECTIVE_SEVERITY[name] ?? "should-fix",
-					};
-				}
-			}
-		}
-
-		if (typeof user.quality === "object" && user.quality !== null && !Array.isArray(user.quality)) {
-			const q = user.quality as Record<string, unknown>;
-			if (typeof q.rejectGeneric === "boolean") config.quality.rejectGeneric = q.rejectGeneric;
-			if (typeof q.requireEvidence === "boolean") config.quality.requireEvidence = q.requireEvidence;
-			if (typeof q.minFindingsPerFile === "number") config.quality.minFindingsPerFile = q.minFindingsPerFile;
-		}
-
-		if (typeof user.autoReview === "object" && user.autoReview !== null && !Array.isArray(user.autoReview)) {
-			const a = user.autoReview as Record<string, unknown>;
-			if (typeof a.onEdit === "boolean") config.autoReview.onEdit = a.onEdit;
-			if (typeof a.onCommit === "boolean") config.autoReview.onCommit = a.onCommit;
-			if (typeof a.onPR === "boolean") config.autoReview.onPR = a.onPR;
-		}
+		const config = deepMerge(
+			structuredClone(DEFAULT_CONFIG) as unknown as Record<string, unknown>,
+			parsed as Record<string, unknown>,
+		) as ReviewExtensionConfig;
 
 		return { config, source: "file" };
 	} catch {
