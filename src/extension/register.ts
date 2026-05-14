@@ -1,6 +1,20 @@
 import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
 import { loadConfig } from "../config.ts";
 import { registerReviewTools } from "./tool-registry.ts";
+import {
+  DEFAULT_POLICY,
+  createDeletePathGuard,
+  createConsentVerifier,
+  createComplianceChecker,
+  generateAuditEntry,
+  type GovernancePolicy,
+} from "../governance/index.ts";
+
+// Governance state for the session
+let activePolicy: GovernancePolicy = DEFAULT_POLICY;
+let deletePathGuard = createDeletePathGuard(DEFAULT_POLICY);
+let consentVerifier = createConsentVerifier(DEFAULT_POLICY);
+let complianceChecker = createComplianceChecker(DEFAULT_POLICY);
 
 // Import perspectives to trigger registration side effects
 import "../perspectives/security.ts";
@@ -16,12 +30,45 @@ export function registerPiReview(pi: ExtensionAPI): void {
 
 		if (!config.enabled) return;
 
+		// Initialize governance with config settings if available
+		if (config.governance) {
+			const {
+				retentionDays = DEFAULT_POLICY.retentionDays,
+				privacyLevel = DEFAULT_POLICY.privacyLevel,
+				auditLog = DEFAULT_POLICY.auditLog,
+				consentRequired = DEFAULT_POLICY.consentRequired,
+			} = config.governance;
+			activePolicy = { retentionDays, privacyLevel, auditLog, consentRequired };
+			deletePathGuard = createDeletePathGuard(activePolicy);
+			consentVerifier = createConsentVerifier(activePolicy);
+			complianceChecker = createComplianceChecker(activePolicy);
+		}
+
 		// Register review tools
 		registerReviewTools(pi);
 
 		// Register slash commands
 		registerReviewCommands(pi, ctx);
 	});
+}
+
+/**
+ * Governance helper functions exported for use by other modules
+ */
+export function getDeletePathGuard() {
+	return deletePathGuard;
+}
+
+export function getConsentVerifier() {
+	return consentVerifier;
+}
+
+export function getComplianceChecker() {
+	return complianceChecker;
+}
+
+export function getActivePolicy(): GovernancePolicy {
+	return activePolicy;
 }
 
 function registerReviewCommands(pi: ExtensionAPI, ctx: ExtensionContext): void {

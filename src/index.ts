@@ -13,3 +13,21 @@ export { createAuditTrail, type AuditEntry, type AuditTrailOptions } from './aud
 
 // Diff scopes exports
 export { createDiffScopes, type DiffScope, type DiffScopeConfig, type DiffResult } from './diff/diff-scopes.js';
+
+// Governance exports
+export {
+  DEFAULT_POLICY,
+  STRICT_POLICY,
+  createPolicy,
+  isValidPolicy,
+  createDeletePathGuard,
+  createConsentVerifier,
+  createComplianceChecker,
+  generateAuditEntry,
+  type GovernancePolicy,
+  type PrivacyLevel,
+  type AuditPathContext,
+  type AuditPathResult,
+  type ComplianceViolation,
+  type ComplianceReport,
+} from './governance/index.js';
