@@ -4,6 +4,7 @@ import { ReviewOrchestrator } from "../review/orchestrator.ts";
 import { generateReport, formatReport } from "../review/report.ts";
 import { calculateImpact } from "../diff/impact-calculator.ts";
 import { classifyChanges, allHunks } from "../diff/change-analysis.ts";
+import { classifyIntake, selectWorkflow, applyIntakeWorkflow } from "../intake/intake-lanes.ts";
 
 interface ReviewToolResult {
 	content: Array<{ type: "text"; text: string }>;
@@ -30,18 +31,36 @@ export function registerReviewTools(pi: ExtensionAPI): void {
 			head: Type.Optional(Type.String({ description: "Git head ref (default: HEAD)." })),
 			perspectives: Type.Optional(Type.Array(Type.String(), { description: "Review perspectives to use. Default: all enabled." })),
 			maxFiles: Type.Optional(Type.Number({ description: "Maximum files to review. Default: 20." })),
+			lane: Type.Optional(Type.String({ description: "Intake lane: 'tiny', 'normal', or 'high-risk'. Auto-detected if not specified." })),
 		}) as never,
 		async execute(_id, params, _signal, _onUpdate, ctx) {
-			const p = params as { base?: string; head?: string; perspectives?: string[]; maxFiles?: number };
+			const p = params as { base?: string; head?: string; perspectives?: string[]; maxFiles?: number; lane?: string };
 			try {
+				// Apply intake lane classification
+				const metadata = classifyIntake({
+					files: undefined,
+					base: p.base,
+					head: p.head,
+					explicitLane: p.lane as "tiny" | "normal" | "high-risk" | undefined,
+					userDescription: undefined,
+				});
+				const workflow = selectWorkflow(metadata);
+
 				const orchestrator = new ReviewOrchestrator(ctx.cwd);
-				const report = await orchestrator.reviewDiff(ctx.cwd, {
+				const reviewParams = applyIntakeWorkflow({
 					base: p.base,
 					head: p.head,
 					perspectives: p.perspectives,
 					maxFiles: p.maxFiles,
-				});
+				}, workflow);
+				const report = await orchestrator.reviewDiff(ctx.cwd, reviewParams);
 				const formatted = formatReport(report);
+
+				// Add intake metadata to result if high-risk or canary mode
+				if (metadata.lane !== "normal" || metadata.canaryMode) {
+					const laneInfo = `[${metadata.lane.toUpperCase()}] ${metadata.justification}`;
+					return reviewResult(`${laneInfo}\n\n${formatted}`);
+				}
 				return reviewResult(formatted);
 			} catch (error) {
 				return reviewResult(error instanceof Error ? error.message : String(error), true);
@@ -58,17 +77,33 @@ export function registerReviewTools(pi: ExtensionAPI): void {
 			file: Type.String({ description: "File path to review." }),
 			perspectives: Type.Optional(Type.Array(Type.String(), { description: "Review perspectives to use." })),
 			context: Type.Optional(Type.String({ description: "'full' for complete file or 'changed-only' for diff. Default: full." })),
+			lane: Type.Optional(Type.String({ description: "Intake lane: 'tiny', 'normal', or 'high-risk'. Auto-detected if not specified." })),
 		}) as never,
 		async execute(_id, params, _signal, _onUpdate, ctx) {
-			const p = params as { file: string; perspectives?: string[]; context?: string };
+			const p = params as { file: string; perspectives?: string[]; context?: string; lane?: string };
 			try {
+				// Apply intake lane classification
+				const metadata = classifyIntake({
+					files: [p.file],
+					explicitLane: p.lane as "tiny" | "normal" | "high-risk" | undefined,
+					userDescription: undefined,
+				});
+				const workflow = selectWorkflow(metadata);
+
 				const orchestrator = new ReviewOrchestrator(ctx.cwd);
-				const report = await orchestrator.reviewFile(ctx.cwd, p.file, {
+				const reviewParams = applyIntakeWorkflow({
 					file: p.file,
 					perspectives: p.perspectives,
 					context: p.context === "changed-only" ? "changed-only" : "full",
-				});
+				}, workflow);
+				const report = await orchestrator.reviewFile(ctx.cwd, p.file, reviewParams);
 				const formatted = formatReport(report);
+
+				// Add intake metadata to result if high-risk or canary mode
+				if (metadata.lane !== "normal" || metadata.canaryMode) {
+					const laneInfo = `[${metadata.lane.toUpperCase()}] ${metadata.justification}`;
+					return reviewResult(`${laneInfo}\n\n${formatted}`);
+				}
 				return reviewResult(formatted);
 			} catch (error) {
 				return reviewResult(error instanceof Error ? error.message : String(error), true);
