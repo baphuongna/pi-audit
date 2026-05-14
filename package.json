@@ -1,6 +1,6 @@
 {
   "name": "pi-audit",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Security review and compliance audit extension for Pi coding agents",
   "type": "module",
   "main": "./index.ts",
@@ -44,5 +44,8 @@
   "peerDependencies": {
     "typescript": "^5.0.0",
     "@earendil-works/pi-coding-agent": ">=0.73.0"
+  },
+  "scripts": {
+    "postinstall": "node install.mjs"
   }
 }
