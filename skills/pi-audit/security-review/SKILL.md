@@ -180,3 +180,69 @@ With memory:
 1. Find SQL injection → Fix it
 2. memory_store findings
 3. Next session: memory_search → Found it before! → Skip
+
+## Cross-Extension Integration
+
+### With pi-langsrv (Code Navigation)
+
+```typescript
+// Find all inputs to audit
+lsp_find_refs({ file: "src/input.ts", line: 10 })
+// → Found all input fields
+
+// Navigate to handler
+lsp_goto_def({ file: "src/input.ts", line: 10 })
+
+// Then audit
+review_file({ file: "src/handler.ts", context: "full" })
+```
+
+### With pi-browse (CVE Research)
+
+```typescript
+// Found potential vulnerability
+review_file({ file: "src/auth.ts" })
+// → SQL query with string concat
+
+// Research the fix
+web_search({ query: "SQL injection express fix parameterized" })
+web_fetch({ url: "https://owasp.org/www-community/attacks/SQL_Injection" })
+```
+
+### With pi-debug (Verify Exploit)
+
+```typescript
+// Found potential SQL injection
+review_diff()
+
+// Verify it's exploitable
+debug_start({ program: "src/app.ts" })
+debug_breakpoint({ file: "src/db.ts", line: 42 })
+debug_evaluate({ expression: "userInput" })
+// → Confirmed: user input directly in query
+```
+
+### With pi-pipeline (Security Gate)
+
+```typescript
+// Add security check to pipeline
+pipeline_verify({
+  testCommand: "npm test",
+  gates: ["security-audit"]
+})
+// → Blocks merge if security issues found
+```
+
+### With pi-render (Visual Report)
+
+```typescript
+// Show audit progress
+visual_update_progress({ phase: "audit", completed: 5, total: 10 })
+
+// Show findings
+visual_show_findings({
+  findings: [
+    { file: "src/auth.ts", severity: "high", message: "SQL injection possible" }
+  ]
+})
+```
