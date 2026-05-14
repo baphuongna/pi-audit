@@ -1,6 +1,6 @@
 {
   "name": "pi-audit",
-  "version": "0.4.10",
+  "version": "0.4.12",
   "description": "Security review and compliance audit extension for Pi coding agents",
   "type": "module",
   "main": "./index.ts",
@@ -18,6 +18,7 @@
     "src/**/*.ts",
     "README.md",
     "docs/",
+    "skills/",
     "CHANGELOG.md",
     "LICENSE"
   ],
