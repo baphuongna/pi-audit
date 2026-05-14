@@ -1,6 +1,6 @@
 {
   "name": "pi-audit",
-  "version": "0.4.4",
+  "version": "0.4.7",
   "description": "Security review and compliance audit extension for Pi coding agents",
   "type": "module",
   "main": "./index.ts",
@@ -42,7 +42,6 @@
     "typebox": "^1.1.0"
   },
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": ">=0.73.0",
     "typescript": "^5.0.0",
     "@earendil-works/pi-coding-agent": ">=0.73.0"
   }

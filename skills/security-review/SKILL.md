@@ -9,7 +9,7 @@ triggers:
   - review code
   - check security
 requirements:
-  tools: [read, bash]
+  tools: [review_diff, review_file, review_report, read, bash]
   context: [code files to review]
 ---
 
@@ -17,6 +17,11 @@ requirements:
 
 ## Objective
 Perform comprehensive security review using AgentShield scanning, OWASP Top 10 + STRIDE analysis, and multi-perspective review.
+
+## Tools Available
+- `review_diff` - Review git diff with multi-perspective analysis
+- `review_file` - Review a single file with multi-perspective analysis
+- `review_report` - Generate a formatted review report from findings
 
 ## When to Use
 - When user asks to "review code for security" or "audit this"
@@ -26,42 +31,22 @@ Perform comprehensive security review using AgentShield scanning, OWASP Top 10 +
 
 ## Workflow
 
-### Step 1: AgentShield Scan
+### Step 1: Review Diff or File
 ```typescript
-import { AgentShield } from '../../src/security/agent-shield';
+// Review git diff
+review_diff({ base: "HEAD~1", head: "HEAD" });
 
-const shield = new AgentShield();
-
-// Scan code
-const result = shield.scan(code);
-
-if (!result.passed) {
-  console.log('Security issues found!');
-  console.log(shield.formatReport(result));
-}
+// Or review a single file
+review_file({ file: "src/auth/login.ts", context: "full" });
 ```
 
-### Step 2: OWASP + STRIDE Audit
+### Step 2: Generate Report
 ```typescript
-import { OWASPAuditor } from '../../src/security/owasp-audit';
-
-const auditor = new OWASPAuditor();
-const audit = auditor.audit(code);
-
-console.log(auditor.formatReport(audit));
-```
-
-### Step 3: Multi-Perspective Review
-```typescript
-import { MultiPerspectiveReviewer } from '../../src/review/multi-perspective';
-
-const reviewer = new MultiPerspectiveReviewer();
-const review = reviewer.review(code, {
-  project: 'my-project',
-  goal: 'Implement secure authentication'
+review_report({
+  format: "markdown",
+  groupBy: "severity",
+  includeSuggestions: true
 });
-
-console.log(reviewer.formatReport(review));
 ```
 
 ## Security Checks
@@ -102,35 +87,25 @@ console.log(reviewer.formatReport(review));
 ### Basic Security Scan
 ```
 User: Scan this code for security issues
-Agent:
-  const shield = new AgentShield();
-  const result = shield.scan(userCode);
-  console.log(shield.formatReport(result));
+Agent: review_diff({ base: "HEAD~1" })
 ```
 
-### Full OWASP Audit
+### Full File Review
 ```
-User: Run OWASP audit on the auth module
-Agent:
-  const auditor = new OWASPAuditor();
-  const audit = auditor.audit(authCode);
-  console.log(auditor.formatReport(audit));
+User: Review the auth module for security
+Agent: review_file({ file: "src/auth/*", perspectives: ["security"] })
 ```
 
-### Multi-Perspective Review
+### Generate Report
 ```
-User: Review this code from security, quality, and performance perspectives
-Agent:
-  const reviewer = new MultiPerspectiveReviewer();
-  const result = reviewer.review(code, { goal: 'Secure API' });
-  console.log(reviewer.formatReport(result));
+Agent: review_report({ format: "markdown" })
 ```
 
 ## Output Format
 
-### AgentShield Report
+### Review Report
 ```markdown
-## Security Scan Report
+## Security Review Report
 **Status:** ❌ FAILED
 
 ### Summary
@@ -138,23 +113,9 @@ Agent:
 - 🟠 High: 3
 - 🟡 Medium: 1
 
-### Issues
-- **Injection** at line 5
-  - Dangerous eval() usage
-  - `eval(userInput)`
-  - 💡 Use safe alternatives
-```
-
-### OWASP Report
-```markdown
-## OWASP Top 10 + STRIDE Audit
-**Status:** ⚠️ NEEDS ATTENTION
-
-### Compliance
-| A01 Broken Access Control | ❌ |
-| A02 Cryptographic Failures | ✅ |
-| A03 Injection | ❌ |
-...
+### Issues by Severity
+- **CRITICAL**: SQL Injection at line 42
+- **HIGH**: Hardcoded credentials at line 15
 ```
 
 ## Integration
@@ -162,22 +123,6 @@ Agent:
 ### With pi-pipeline
 ```typescript
 // Run security scan as quality gate
-const shield = new AgentShield();
-const result = shield.scan(code);
-
-if (result.summary.critical > 0) {
-  throw new Error('Critical security issues must be fixed');
-}
-```
-
-### CI/CD Integration
-```bash
-# Pre-commit security check
-npx tsx security-scan.ts src/
-
-# Fail if critical issues
-if [ $? -ne 0 ]; then
-  echo "Security issues found!"
-  exit 1
-fi
+review_diff({ base: "HEAD~1" });
+// Fail if critical issues found
 ```
