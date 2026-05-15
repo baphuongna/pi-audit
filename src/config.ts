@@ -80,7 +80,7 @@ export function loadConfig(cwd: string): { config: ReviewExtensionConfig; source
 		const config = deepMerge(
 			structuredClone(DEFAULT_CONFIG) as unknown as Record<string, unknown>,
 			parsed as Record<string, unknown>,
-		) as ReviewExtensionConfig;
+		) as unknown as ReviewExtensionConfig;
 
 		return { config, source: "file" };
 	} catch {

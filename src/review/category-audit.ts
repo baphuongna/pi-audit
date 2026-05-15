@@ -5,6 +5,8 @@
  * and filtering.
  */
 
+
+import { randomUUID } from 'node:crypto';
 export type AuditCategory = 
   | 'security'      // Security vulnerabilities
   | 'performance'   // Performance issues
@@ -43,7 +45,7 @@ export function createCategoryAnalyzer() {
   const findings: CategorizedFinding[] = [];
   
   function generateId(): string {
-    return `AUDIT-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
+    return `AUDIT-${randomUUID()}`;
   }
   
   return {

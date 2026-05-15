@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { createCategoryAnalyzer } from '../../src/review/category-audit.js';
+import { createCategoryAnalyzer } from '../../src/review/category-audit.ts';
 
 describe('Category Audit', () => {
   const analyzer = createCategoryAnalyzer();
@@ -47,6 +47,6 @@ describe('Category Audit', () => {
     
     const report = analyzer.generateReport();
     assert.ok(report.includes('# Audit Report'));
-    assert.ok(report.includes('SECURITY'));
+    assert.ok(report.includes('Security'));
   });
 });

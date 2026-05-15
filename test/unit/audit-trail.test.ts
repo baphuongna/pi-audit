@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
 import * as fs from 'node:fs';
-import { createAuditTrail } from '../../src/audit/audit-trail.js';
+import { createAuditTrail } from '../../src/audit/audit-trail.ts';
 
 describe('Audit Trail', () => {
   const testFile = '/tmp/test-audit.jsonl';

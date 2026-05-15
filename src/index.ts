@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { registerPiReview } from "./extension/register.ts";
 
 export default function (pi: ExtensionAPI): void {
@@ -12,7 +12,7 @@ export { createCategoryAnalyzer, type CategorizedFinding, type CategorySummary, 
 export { createAuditTrail, type AuditEntry, type AuditTrailOptions } from './audit/audit-trail.js';
 
 // Diff scopes exports
-export { createDiffScopes, type DiffScope, type DiffScopeConfig, type DiffResult } from './diff/diff-scopes.js';
+export { createDiffScopes, type DiffScope, type DiffScopeConfig } from './diff/diff-scopes.js';
 
 // Governance exports
 export {

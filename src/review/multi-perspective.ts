@@ -107,7 +107,7 @@ export class MultiPerspectiveReviewer {
           perspective: 'quality',
           severity: 'medium',
           title: 'TODO/FIXME comments found',
-          description: `${TODOS.length} incomplete tasks found`,
+          description: `${todos.length} incomplete tasks found`,
           suggestion: 'Address all TODO comments before merging',
         });
       }

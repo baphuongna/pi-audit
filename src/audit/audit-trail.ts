@@ -4,6 +4,7 @@
  * Append-only JSONL audit log with typed entries.
  */
 
+import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -41,7 +42,7 @@ export function createAuditTrail(options: AuditTrailOptions = {}) {
   }
   
   function generateId(): string {
-    return `AUD-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    return `AUD-${randomUUID()}`;
   }
   
   return {
@@ -71,7 +72,7 @@ export function createAuditTrail(options: AuditTrailOptions = {}) {
     readAll(): AuditEntry[] {
       if (!fs.existsSync(filePath)) return [];
       const content = fs.readFileSync(filePath, 'utf-8');
-      return content.trim().split('\n').filter(line => line.trim()).map(line => JSON.parse(line));
+      return content.trim().split('\n').filter(line => line.trim()).map(line => { try { return JSON.parse(line) as AuditEntry; } catch { return null; } }).filter((e): e is AuditEntry => e !== null);
     },
     
     recent(count: number = 10): AuditEntry[] {

@@ -1,5 +1,5 @@
-import type { ExtensionAPI, ToolDefinition } from "@mariozechner/pi-coding-agent";
-import { Type } from "typebox";
+import type { ExtensionAPI, ToolDefinition } from "@earendil-works/pi-coding-agent";
+import { Type } from "@sinclair/typebox";
 import { ReviewOrchestrator } from "../review/orchestrator.ts";
 import { generateReport, formatReport } from "../review/report.ts";
 import { calculateImpact } from "../diff/impact-calculator.ts";

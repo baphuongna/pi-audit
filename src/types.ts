@@ -113,6 +113,14 @@ export interface ReviewExtensionConfig {
 	perspectives: Record<string, PerspectiveConfig>;
 	quality: QualityConfig;
 	autoReview: AutoReviewConfig;
+	governance?: GovernanceConfig;
+}
+
+export interface GovernanceConfig {
+	retentionDays?: number;
+	privacyLevel?: 'strict' | 'standard' | 'permissive';
+	auditLog?: boolean;
+	consentRequired?: boolean;
 }
 
 // ─── Tool Parameters ──────────────────────────────────────────────────────────

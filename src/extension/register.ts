@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { loadConfig } from "../config.ts";
 import { registerReviewTools } from "./tool-registry.ts";
 import {
@@ -8,6 +8,7 @@ import {
   createComplianceChecker,
   generateAuditEntry,
   type GovernancePolicy,
+  type PrivacyLevel,
 } from "../governance/index.ts";
 
 // Governance state for the session
@@ -38,7 +39,7 @@ export function registerPiReview(pi: ExtensionAPI): void {
 				auditLog = DEFAULT_POLICY.auditLog,
 				consentRequired = DEFAULT_POLICY.consentRequired,
 			} = config.governance;
-			activePolicy = { retentionDays, privacyLevel, auditLog, consentRequired };
+			activePolicy = { retentionDays, privacyLevel: privacyLevel as PrivacyLevel, auditLog, consentRequired };
 			deletePathGuard = createDeletePathGuard(activePolicy);
 			consentVerifier = createConsentVerifier(activePolicy);
 			complianceChecker = createComplianceChecker(activePolicy);

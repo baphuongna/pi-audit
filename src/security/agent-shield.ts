@@ -126,7 +126,7 @@ export class AgentShield {
         if (rule.pattern.test(line)) {
           issues.push({
             rule: rule.category,
-            severity: rule.severity,
+            severity: rule.severity as Severity,
             category: rule.category,
             message: rule.message,
             line: i + 1,
