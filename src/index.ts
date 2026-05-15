@@ -1,8 +1,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { registerPiReview } from "./extension/register.ts";
+import { registerPiAudit } from "./extension/register.ts";
 
 export default function (pi: ExtensionAPI): void {
-	registerPiReview(pi);
+	registerPiAudit(pi);
 }
 
 // Category audit exports

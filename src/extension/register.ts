@@ -25,7 +25,7 @@ import "../perspectives/style.ts";
 import "../perspectives/testing.ts";
 import "../perspectives/production.ts";
 
-export function registerPiReview(pi: ExtensionAPI): void {
+export function registerPiAudit(pi: ExtensionAPI): void {
 	pi.on("session_start", (_event, ctx: ExtensionContext) => {
 		const { config } = loadConfig(ctx.cwd);
 
@@ -119,3 +119,9 @@ function registerReviewCommands(pi: ExtensionAPI, ctx: ExtensionContext): void {
 		},
 	});
 }
+
+/**
+ * @deprecated Use `registerPiAudit` instead. This alias preserves backwards
+ * compatibility with the legacy `pi-review` package name.
+ */
+export const registerPiReview = registerPiAudit;
