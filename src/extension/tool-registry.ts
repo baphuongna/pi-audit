@@ -1,5 +1,6 @@
 import type { ExtensionAPI, ToolDefinition } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { visual_show_findings } from "@earendil-works/pi-coding-agent";
 import { ReviewOrchestrator } from "../review/orchestrator.ts";
 import { generateReport, formatReport } from "../review/report.ts";
 import { calculateImpact } from "../diff/impact-calculator.ts";
@@ -56,6 +57,18 @@ export function registerReviewTools(pi: ExtensionAPI): void {
 				const report = await orchestrator.reviewDiff(ctx.cwd, reviewParams);
 				const formatted = formatReport(report);
 
+				// Show findings in visual overlay
+				if (report.findings.length > 0) {
+					await visual_show_findings({
+						findings: report.findings.map((f: { file: string; line?: number; severity: string; message: string }) => ({
+							file: f.file,
+							line: f.line,
+							severity: f.severity as "critical" | "high" | "medium" | "low",
+							message: f.message,
+						})),
+					});
+				}
+
 				// Add intake metadata to result if high-risk or canary mode
 				if (metadata.lane !== "normal" || metadata.canaryMode) {
 					const laneInfo = `[${metadata.lane.toUpperCase()}] ${metadata.justification}`;
@@ -98,6 +111,18 @@ export function registerReviewTools(pi: ExtensionAPI): void {
 				}, workflow);
 				const report = await orchestrator.reviewFile(ctx.cwd, p.file, reviewParams);
 				const formatted = formatReport(report);
+
+				// Show findings in visual overlay
+				if (report.findings.length > 0) {
+					await visual_show_findings({
+						findings: report.findings.map((f: { file: string; line?: number; severity: string; message: string }) => ({
+							file: f.file,
+							line: f.line,
+							severity: f.severity as "critical" | "high" | "medium" | "low",
+							message: f.message,
+						})),
+					});
+				}
 
 				// Add intake metadata to result if high-risk or canary mode
 				if (metadata.lane !== "normal" || metadata.canaryMode) {
